@@ -1,71 +1,125 @@
 # Multi PDF Decrypter
 
-Multi PDF Decrypter ist eine plattformübergreifende Desktop-Anwendung zum Entfernen von Passwortschutz aus PDF-Dateien. Die Anwendung läuft nativ auf macOS, Windows und Linux und bietet eine moderne, übersichtliche Benutzeroberfläche.
+Multi PDF Decrypter ist eine plattformübergreifende Desktop-Anwendung zum Entfernen von Passwortschutz aus PDF-Dateien.
+Die Anwendung läuft nativ auf Windows, macOS und Linux und bietet eine moderne, übersichtliche Benutzeroberfläche.
+Native Apps für Android und iOS/iPadOS sind in Planung.
+
+## Plattformen
+
+| Plattform | Status | Technologie |
+|-----------|--------|-------------|
+| Windows 10/11 | Verfügbar | Python + CustomTkinter |
+| macOS 11+ | Verfügbar | Python + CustomTkinter |
+| Linux (Ubuntu 22.04+) | Verfügbar | Python + CustomTkinter |
+| Android | In Planung | Flutter |
+| iOS / iPadOS | In Planung | Flutter |
+
+## Releases herunterladen
+
+Fertige Builds für alle Desktop-Plattformen sind unter
+[Releases](https://github.com/baodor/multi-pdf-decrypter/releases) verfügbar.
+Keine Installation von Python oder sonstigen Abhängigkeiten erforderlich.
+
+| Plattform | Datei |
+|-----------|-------|
+| Windows | `Multi.PDF.Decrypter-Windows-vX.Y.Z.zip` |
+| macOS | `Multi.PDF.Decrypter-macOS-vX.Y.Z.dmg` |
+| Linux | `Multi.PDF.Decrypter-Linux-vX.Y.Z.tar.gz` |
 
 
 ## Inhaltsverzeichnis
 
 1. Funktionsübersicht
-2. Systemvoraussetzungen
-3. Installation
-4. Starten der Anwendung
-5. Bedienung
-6. Einstellungen und Datenspeicherung
-7. Rückgängig-Funktion
-8. Gespeicherte Ordner
-9. Build-Anleitung (eigenständige Anwendung)
-10. Dateistruktur
+2. Repository-Struktur
+3. Systemvoraussetzungen
+4. Aus Quellcode starten
+5. Lokale Builds erstellen
+6. Automatische Releases via GitHub Actions
+7. Bedienung
+8. Einstellungen und Datenspeicherung
+9. Rückgängig-Funktion
+10. Gespeicherte Ordner
 11. Hinweise zur Sicherheit
-12. Zukünftige Erweiterungen
+12. Mobile Plattformen (Ausblick)
 13. Lizenz
 
 
 ## Funktionsübersicht
 
-Die Anwendung bietet folgende Kernfunktionen:
+PDFs per Drag-and-Drop oder Dateidialog hinzufügen, einzelne Dateien oder ganze Ordner
 
-PDFs per Drag-and-Drop oder Dateidialog hinzufügen (einzelne Dateien oder ganze Ordner)
-
-Mehrere Passwörter verwalten und speichern, damit die Anwendung PDFs beim nächsten Start automatisch entschlüsseln kann
+Mehrere Passwörter speichern und wiederverwenden, damit alle PDFs beim nächsten Start automatisch entschlüsselt werden können
 
 Alle ausgewählten PDFs mit einem Klick entschlüsseln
 
-Nicht entschlüsselbare PDFs (falsches oder kein passendes Passwort) werden automatisch in einen Unterordner namens "Locked" verschoben
+Nicht entschlüsselbare PDFs (kein passendes Passwort) werden automatisch in einen Unterordner namens "Locked" verschoben
 
-Optionaler "(Unlocked)"-Präfix vor dem Dateinamen der entschlüsselten PDFs
+Optionaler "(Unlocked)"-Präfix vor dem Dateinamen, standardmäßig deaktiviert
 
-Gespeicherte Ordnerpfade, die beim Klick auf "Scannen" automatisch nach verschlüsselten PDFs durchsucht werden
+Gespeicherte Ordnerpfade mit automatischer Suche nach verschlüsselten PDFs
 
 Vollständige Rückgängig-Funktion für alle durchgeführten Vorgänge
 
-Automatisches Speichern aller Einstellungen (Passwörter, Ordner, Fenstergröße, Design)
+Alle Einstellungen werden automatisch gespeichert und beim nächsten Start wiederhergestellt
 
-Unterstützung für helles und dunkles Design sowie automatische Systemanpassung
+Helles Design, dunkles Design und automatische Systemanpassung
+
+
+## Repository-Struktur
+
+```
+multi-pdf-decrypter/
+    src/                              Gemeinsame Python-Quellcode-Basis (Desktop)
+        main.py                       Einstiegspunkt und Abhängigkeitsprüfung
+        app_window.py                 Hauptfenster, Steuerung und Threading
+        models.py                     Datenmodelle (PDFFile, Passwort, Ordner, Undo)
+        pdf_processor.py              PDF-Verarbeitungslogik mit pikepdf
+        settings_manager.py           JSON-Persistenz für alle Einstellungen
+        requirements.txt              Python-Abhängigkeiten
+        frames/
+            __init__.py
+            files_tab.py              Tab "Dateien" mit Drop-Zone und Dateiliste
+            folders_tab.py            Tab "Gespeicherte Ordner"
+            history_tab.py            Tab "Verlauf" mit Rückgängig-Schaltflächen
+            password_panel.py         Rechtes Panel für Passwörter und Optionen
+    platforms/
+        windows/
+            build.bat                 Lokales Build-Skript für Windows
+            README.md                 Windows-spezifische Dokumentation
+        macos/
+            build.sh                  Lokales Build-Skript für macOS
+            README.md                 macOS-spezifische Dokumentation
+        linux/
+            build.sh                  Lokales Build-Skript für Linux
+            multi-pdf-decrypter.desktop   Desktop-Integrationsdatei
+            README.md                 Linux-spezifische Dokumentation
+        android/
+            README.md                 Planung und Roadmap (in Entwicklung)
+        ios/
+            README.md                 Planung und Roadmap (in Entwicklung)
+    .github/
+        workflows/
+            release.yml               GitHub Actions: Build + Release bei Tag-Push
+    LICENSE
+    README.md
+```
 
 
 ## Systemvoraussetzungen
 
-Alle Plattformen:
-Python 3.10 oder neuer
+Für das direkte Ausführen aus dem Quellcode wird Python 3.10 oder neuer benötigt.
+Die vorgefertigten Release-Builds benötigen keine Python-Installation.
 
-macOS:
-macOS 11 (Big Sur) oder neuer
+Windows: Windows 10 oder neuer (64-Bit)
 
-Windows:
-Windows 10 oder neuer
+macOS: macOS 11 (Big Sur) oder neuer (Intel und Apple Silicon)
 
-Linux:
-Eine aktuelle Distribution mit Tk/Tcl-Unterstützung (z. B. Ubuntu 22.04 oder neuer).
-Das Paket "python3-tk" muss installiert sein:
-
-```
-sudo apt install python3-tk
-```
+Linux: Ubuntu 22.04 oder neuer, mit `python3-tk` installiert
 
 
-## Installation
+## Aus Quellcode starten
 
-Schritt 1: Repository klonen oder herunterladen
+Schritt 1: Repository klonen
 
 ```
 git clone https://github.com/baodor/multi-pdf-decrypter.git
@@ -93,29 +147,84 @@ venv\Scripts\activate
 Schritt 3: Abhängigkeiten installieren
 
 ```
-pip install -r requirements.txt
+pip install -r src/requirements.txt
 ```
 
-Die folgenden Pakete werden installiert:
-
-customtkinter wird für die moderne Benutzeroberfläche auf Basis von Tkinter verwendet.
-
-pikepdf ist die PDF-Bibliothek zum Entfernen von Verschlüsselung. Sie basiert auf der quelloffenen Bibliothek QPDF.
-
-Pillow wird für die Bildverarbeitung in UI-Elementen benötigt.
-
-tkinterdnd2 ermöglicht Drag-and-Drop-Unterstützung. Dieses Paket ist optional, aber empfohlen.
-
-
-## Starten der Anwendung
+Schritt 4: Anwendung starten
 
 ```
-python3 main.py
+python3 src/main.py
 ```
 
-Beim ersten Start wird automatisch eine Konfigurationsdatei angelegt (siehe Abschnitt "Einstellungen und Datenspeicherung").
+Installierte Abhängigkeiten:
 
-Falls tkinterdnd2 nicht installiert ist, erscheint ein Hinweis in der Konsole und Drag-and-Drop ist deaktiviert. Alle anderen Funktionen bleiben vollständig nutzbar.
+customtkinter, für die moderne Benutzeroberfläche auf Basis von Tkinter
+
+pikepdf, für die PDF-Entschlüsselung, basiert auf der quelloffenen Bibliothek QPDF
+
+Pillow, für die Bildverarbeitung in UI-Elementen
+
+tkinterdnd2, für Drag-and-Drop-Unterstützung (optional, alle anderen Funktionen bleiben nutzbar)
+
+
+## Lokale Builds erstellen
+
+Eigenständige Anwendungen können lokal gebaut werden. Eine Python-Installation
+ist danach auf dem Zielrechner nicht mehr erforderlich.
+
+### Windows
+
+```
+platforms\windows\build.bat
+```
+
+Ausgabe: `platforms\windows\dist\Multi PDF Decrypter\Multi PDF Decrypter.exe`
+
+### macOS
+
+```
+chmod +x platforms/macos/build.sh
+./platforms/macos/build.sh
+```
+
+Ausgabe: `platforms/macos/dist/Multi PDF Decrypter.app` und `*.dmg`
+
+### Linux
+
+```
+chmod +x platforms/linux/build.sh
+./platforms/linux/build.sh
+```
+
+Ausgabe: `platforms/linux/dist/multi-pdf-decrypter/multi-pdf-decrypter`
+
+Plattformspezifische Details sind in den jeweiligen `platforms/<plattform>/README.md` beschrieben.
+
+
+## Automatische Releases via GitHub Actions
+
+Ein GitHub Actions Workflow (`.github/workflows/release.yml`) baut automatisch
+alle drei Desktop-Plattformen und erstellt einen GitHub Release.
+
+Der Workflow wird ausgelöst, wenn ein Git-Tag mit dem Muster `v*.*.*` gepusht wird.
+
+Neuen Release erstellen:
+
+```
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+Danach startet GitHub Actions und baut parallel auf:
+
+Windows (windows-latest Runner), erzeugt `Multi.PDF.Decrypter-Windows-v1.0.0.zip`
+
+macOS (macos-latest Runner), erzeugt `Multi.PDF.Decrypter-macOS-v1.0.0.dmg`
+
+Linux (ubuntu-latest Runner), erzeugt `Multi.PDF.Decrypter-Linux-v1.0.0.tar.gz`
+
+Alle drei Dateien werden automatisch als GitHub Release-Assets veröffentlicht.
+Tags mit Bindestrich (z. B. `v1.0.0-beta1`) werden als Pre-Release markiert.
 
 
 ## Bedienung
@@ -124,175 +233,106 @@ Falls tkinterdnd2 nicht installiert ist, erscheint ein Hinweis in der Konsole un
 
 Es gibt drei Möglichkeiten, PDFs zur Verarbeitungsliste hinzuzufügen.
 
-Drag-and-Drop: PDF-Dateien oder einen Ordner direkt in das Programmfenster ziehen. Der Bereich wechselt automatisch zum Tab "Dateien" und hebt sich hervor, sobald Dateien über das Fenster gezogen werden.
+Drag-and-Drop: PDF-Dateien oder einen Ordner direkt in das Programmfenster ziehen.
+Das Fenster wechselt automatisch zum Tab "Dateien" und hebt sich hervor.
 
-Schaltfläche "Dateien wählen": Öffnet einen Dateiauswahldialog, in dem mehrere PDF-Dateien gleichzeitig ausgewählt werden können.
+Schaltfläche "Dateien wählen": Öffnet einen Dateiauswahldialog für mehrere PDFs.
 
-Schaltfläche "Ordner wählen": Öffnet einen Ordnerauswahldialog. Alle PDF-Dateien im ausgewählten Ordner und allen Unterordnern werden automatisch zur Liste hinzugefügt. Dateien in "Locked"- und ".pdf_backups"-Verzeichnissen werden dabei automatisch übersprungen.
+Schaltfläche "Ordner wählen": Öffnet einen Ordnerauswahldialog. Alle PDFs
+im Ordner und allen Unterordnern werden zur Liste hinzugefügt.
+Dateien in "Locked"- und ".pdf_backups"-Verzeichnissen werden übersprungen.
 
 ### Passwörter eingeben und speichern
 
 Im rechten Bereich des Fensters befindet sich die Passwortverwaltung.
+Das Passwort eingeben, optional eine Bezeichnung vergeben und auf
+"Passwort hinzufügen" klicken. Passwörter werden dauerhaft gespeichert
+und beim nächsten Start automatisch wiederhergestellt.
 
-Im Feld "Passwort eingeben" das gewünschte Passwort eintippen. Optional kann eine Bezeichnung vergeben werden (z. B. "Arbeit", "Privat", "Bank"), um Passwörter leichter zuzuordnen. Anschließend auf "+ Passwort hinzufügen" klicken.
-
-Das Passwort erscheint nun in der Liste und wird dauerhaft gespeichert. Beim nächsten Start der Anwendung sind alle Passwörter automatisch wieder verfügbar.
-
-Das Auge-Symbol neben einem Passwort blendet das Passwort im Klartext ein oder aus.
-
-Das "X"-Symbol löscht ein Passwort dauerhaft aus der Liste.
+Das Auge-Symbol blendet das Passwort im Klartext ein oder aus.
+Das X-Symbol löscht ein Passwort dauerhaft.
 
 ### PDFs entschlüsseln
 
-Sobald mindestens eine Datei in der Liste vorhanden ist und mindestens ein Passwort gespeichert wurde, kann auf "Alle entschlüsseln" geklickt werden.
+Auf "Alle entschlüsseln" klicken. Die Anwendung verarbeitet jede Datei einzeln.
 
-Die Anwendung verarbeitet jede Datei einzeln und zeigt den aktuellen Status direkt in der Dateiliste an.
+"Entschlüsselt" (grün): Erfolgreich entschlüsselt und am Originalort gespeichert.
 
-Der Status "Entschlüsselt" (grün) bedeutet, dass die PDF erfolgreich entschlüsselt und am ursprünglichen Speicherort gespeichert wurde.
+"Kein passendes Passwort" (orange): Kein Passwort hat gepasst. Die Datei wurde in den "Locked"-Unterordner verschoben.
 
-Der Status "Kein passendes Passwort" (orange) bedeutet, dass kein gespeichertes Passwort gepasst hat. Die Datei wurde in den Unterordner "Locked" im selben Verzeichnis verschoben.
+"Nicht verschlüsselt" (blau): Die Datei war bereits ohne Passwortschutz.
 
-Der Status "Nicht verschlüsselt" (blau) bedeutet, dass die Datei bereits ohne Passwortschutz war und keine Änderung vorgenommen wurde.
-
-Der Status "Fehler" (rot) bedeutet, dass bei der Verarbeitung ein Fehler aufgetreten ist, zum Beispiel weil die Datei beschädigt ist oder die Zugriffsrechte fehlen.
+"Fehler" (rot): Verarbeitungsfehler, z. B. beschädigte Datei oder fehlende Rechte.
 
 ### "(Unlocked)"-Präfix
 
-Im rechten Bereich unter "Optionen" befindet sich die Option '"(Unlocked)" vor Dateinamen'. Ist diese Option aktiviert, wird der entschlüsselten Datei das Präfix "(Unlocked) " vorangestellt.
-
-Beispiel: Aus der Datei "Rechnung.pdf" wird "(Unlocked) Rechnung.pdf".
-
-Diese Option ist standardmäßig deaktiviert und wird dauerhaft gespeichert.
-
-### Dateien aus der Liste entfernen
-
-Einzelne Dateien können mit dem "X"-Symbol in der jeweiligen Zeile aus der Liste entfernt werden, solange sie sich im Status "Ausstehend" befinden. Mit der Schaltfläche "Leeren" wird die gesamte Liste auf einmal geleert.
+Unter "Optionen" im rechten Panel die Option aktivieren. Dann wird vor den
+Dateinamen der entschlüsselten PDF das Präfix "(Unlocked) " geschrieben.
+Aus "Rechnung.pdf" wird "(Unlocked) Rechnung.pdf". Standardmäßig deaktiviert.
 
 
 ## Einstellungen und Datenspeicherung
 
-Alle Einstellungen werden automatisch gespeichert und beim nächsten Start der Anwendung wiederhergestellt.
+Alle Einstellungen werden automatisch gespeichert.
 
 Speicherort der Konfigurationsdatei:
 
-Auf macOS: ~/Library/Application Support/MultiPDFDecrypter/settings.json
+macOS: ~/Library/Application Support/MultiPDFDecrypter/settings.json
 
-Auf Windows: %APPDATA%\MultiPDFDecrypter\settings.json
+Windows: %APPDATA%\MultiPDFDecrypter\settings.json
 
-Auf Linux: ~/.config/MultiPDFDecrypter/settings.json
+Linux: ~/.config/MultiPDFDecrypter/settings.json
 
-Folgende Einstellungen werden gespeichert: alle Passwörter inklusive optionaler Bezeichnung, alle gespeicherten Ordnerpfade, die Aktivierung des "(Unlocked)"-Präfixes, das ausgewählte Design (Hell, Dunkel, System) sowie Fenstergröße und Position.
+Gespeicherte Einstellungen: alle Passwörter mit Bezeichnung, alle Ordnerpfade,
+Aktivierung des Präfixes, Design (Hell, Dunkel, System), Fenstergröße und Position.
 
 
 ## Rückgängig-Funktion
 
-Jeder Entschlüsselungsvorgang wird automatisch im Tab "Verlauf" protokolliert. Dort ist ersichtlich, wann wie viele Dateien entschlüsselt oder in den "Locked"-Ordner verschoben wurden.
+Jeder Entschlüsselungsvorgang wird automatisch im Tab "Verlauf" protokolliert.
 
-Um einen Vorgang rückgängig zu machen, im Tab "Verlauf" auf "Rückgängig" neben dem entsprechenden Eintrag klicken. Alternativ kann über die Schaltfläche "Letzten rückgängig" in der unteren Leiste der zuletzt durchgeführte Vorgang mit einem Klick zurückgenommen werden.
+Um einen Vorgang rückgängig zu machen, im Tab "Verlauf" auf "Rückgängig"
+neben dem entsprechenden Eintrag klicken. Alternativ kann über
+"Letzten rückgängig" in der unteren Leiste der zuletzt durchgeführte Vorgang
+mit einem Klick zurückgenommen werden.
 
-Was beim Rückgängigmachen passiert:
+Entschlüsselte Dateien: Die entschlüsselte Datei wird gelöscht und das
+Original aus dem versteckten Backup-Ordner ".pdf_backups" wiederhergestellt.
 
-Entschlüsselte Dateien: Die entschlüsselte Datei wird gelöscht und das Original aus dem versteckten Backup-Ordner ".pdf_backups" wiederhergestellt.
-
-Verschobene Dateien: Dateien, die in "Locked" verschoben wurden, werden wieder an ihren ursprünglichen Speicherort zurückbewegt.
-
-Der Backup-Ordner ".pdf_backups" liegt im selben Verzeichnis wie die Originaldatei und ist auf allen Plattformen standardmäßig versteckt (auf Windows durch das Hidden-Attribut, auf macOS und Linux durch den Punkt am Anfang des Namens).
+Verschobene Dateien: Dateien aus dem "Locked"-Ordner werden wieder an
+ihren ursprünglichen Speicherort zurückbewegt.
 
 
 ## Gespeicherte Ordner
 
-Im Tab "Gespeicherte Ordner" können häufig verwendete Ordnerpfade dauerhaft hinterlegt werden.
-
-Ordner hinzufügen: Auf "+ Ordner" klicken und den gewünschten Ordner im Dialog auswählen. Der Ordnerpfad wird dauerhaft gespeichert und steht beim nächsten Start wieder zur Verfügung.
-
-Einzelnen Ordner scannen: Auf "Scannen" neben dem gewünschten Ordner klicken. Die Anwendung durchsucht den Ordner und alle Unterordner rekursiv nach verschlüsselten PDFs und fügt sie automatisch der Dateiliste im Tab "Dateien" hinzu.
-
-Alle Ordner scannen: Auf "Alle scannen" klicken, um alle gespeicherten Ordner auf einmal zu durchsuchen und verschlüsselte PDFs zu finden.
-
-Ordner entfernen: Mit dem "X"-Symbol wird der gespeicherte Ordnerpfad dauerhaft aus der Liste entfernt. Die Dateien im Ordner werden dabei nicht verändert.
-
-
-## Build-Anleitung (eigenständige Anwendung)
-
-Mit PyInstaller kann die Anwendung als eigenständiges Programm gebaut werden, das ohne eine Python-Installation auf dem Zielrechner auskommt.
-
-### macOS
-
-```
-chmod +x build_macos.sh
-./build_macos.sh
-```
-
-Die fertige App befindet sich anschließend unter dist/Multi PDF Decrypter.app und kann in den Programme-Ordner verschoben werden.
-
-### Windows
-
-```
-build_windows.bat
-```
-
-Die fertige Anwendung befindet sich anschließend unter dist\Multi PDF Decrypter\Multi PDF Decrypter.exe.
-
-### Linux
-
-```
-chmod +x build_linux.sh
-./build_linux.sh
-```
-
-Die fertige Anwendung befindet sich anschließend unter dist/multi-pdf-decrypter/multi-pdf-decrypter.
-
-
-## Dateistruktur
-
-```
-multi-pdf-decrypter/
-    main.py                   Einstiegspunkt und Abhängigkeitsprüfung
-    app_window.py             Hauptfenster, Anwendungssteuerung und Threading
-    models.py                 Datenmodelle für PDFFile, Passwort, Ordner und Undo
-    pdf_processor.py          PDF-Verarbeitungslogik mit pikepdf
-    settings_manager.py       Einstellungsverwaltung und JSON-Persistenz
-    requirements.txt          Python-Abhängigkeiten
-    build_macos.sh            Build-Skript für macOS
-    build_windows.bat         Build-Skript für Windows
-    build_linux.sh            Build-Skript für Linux
-    frames/
-        __init__.py
-        files_tab.py          Tab "Dateien" mit Drop-Zone und Dateiliste
-        folders_tab.py        Tab "Gespeicherte Ordner"
-        history_tab.py        Tab "Verlauf" mit Rückgängig-Funktion
-        password_panel.py     Rechtes Panel für Passwörter und Optionen
-```
+Im Tab "Gespeicherte Ordner" können häufig verwendete Ordnerpfade dauerhaft
+hinterlegt werden. Beim Klick auf "Scannen" werden alle verschlüsselten PDFs
+im Ordner und allen Unterordnern gefunden und zur Dateiliste hinzugefügt.
+"Alle scannen" durchsucht alle gespeicherten Ordner auf einmal.
 
 
 ## Hinweise zur Sicherheit
 
-Passwörter werden im Klartext in der JSON-Konfigurationsdatei gespeichert. Dies ist für den persönlichen Einsatz auf dem eigenen Rechner ausreichend. Für höhere Sicherheitsanforderungen sollte die Konfigurationsdatei verschlüsselt oder Passwörter ausschließlich in einem dedizierten Passwort-Manager aufbewahrt werden.
+Passwörter werden im Klartext in der JSON-Konfigurationsdatei gespeichert.
+Dies ist für den persönlichen Einsatz ausreichend. Für höhere Sicherheitsanforderungen
+sollten Passwörter ausschließlich in einem dedizierten Passwort-Manager gespeichert werden.
 
-Die Anwendung entfernt ausschließlich den Benutzerpasswortschutz von PDFs. Dokumente mit zusätzlichem digitalen Rechtemanagementsystem (DRM) oder proprietären Schutzmechanismen werden möglicherweise nicht vollständig entsperrt.
+Die Originaldateien werden vor dem Überschreiben immer im versteckten Ordner ".pdf_backups"
+gesichert. Es gehen keine Daten verloren.
 
-Die Originaldateien werden vor dem Überschreiben immer zuerst in einem versteckten Ordner ".pdf_backups" gesichert, sodass durch eine fehlgeschlagene Verarbeitung keine Daten verloren gehen können.
+Die Anwendung läuft vollständig lokal. Es werden keine Dateien, Passwörter oder
+Metadaten an externe Server übertragen.
 
-Die Anwendung läuft vollständig lokal auf dem eigenen Rechner. Es werden keinerlei Dateien, Passwörter oder Metadaten an externe Server übertragen.
 
+## Mobile Plattformen (Ausblick)
 
-## Zukünftige Erweiterungen
+Native Apps für Android und iOS/iPadOS sind geplant. Sie werden mit Flutter
+entwickelt, um eine gemeinsame Codebasis zu nutzen. Details dazu in den
+jeweiligen Plattform-Ordnern:
 
-Eine native iOS- und Android-App ist für einen späteren Zeitpunkt geplant. Die Architektur wurde bewusst so gestaltet, dass die Verarbeitungslogik in pdf_processor.py ohne großen Aufwand in einen plattformübergreifenden Dienst oder in eine Flutter-App überführt werden kann.
+platforms/android/README.md
 
-Mögliche weitere Funktionen in zukünftigen Versionen:
-
-Unterstützung für Batch-Verarbeitung mit detaillierter Fortschrittsanzeige
-
-Automatischer Watch-Modus für gespeicherte Ordner, der neu hinzugefügte PDFs sofort erkennt und verarbeitet
-
-Integrierte PDF-Vorschau
-
-Export der Verarbeitungsprotokolle als CSV oder Text
-
-Unterstützung weiterer Verschlüsselungsarten und PDF-Standards
-
-Native iOS-App und Android-App auf Basis von Flutter
+platforms/ios/README.md
 
 
 ## Lizenz
