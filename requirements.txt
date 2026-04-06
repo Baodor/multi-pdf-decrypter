@@ -1,0 +1,4 @@
+customtkinter>=5.2.2
+pikepdf>=8.7.1
+Pillow>=10.0.0
+tkinterdnd2>=0.3.0
