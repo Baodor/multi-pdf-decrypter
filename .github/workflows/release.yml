@@ -44,7 +44,7 @@ jobs:
             --distpath "${{ github.workspace }}/build/windows/dist" `
             --workpath "${{ github.workspace }}/build/windows/work" `
             --specpath "${{ github.workspace }}/build/windows" `
-            --add-data "frames;frames" `
+            --add-data "${{ github.workspace }}/src/frames;frames" `
             --hidden-import customtkinter `
             --hidden-import pikepdf `
             --hidden-import tkinterdnd2 `
@@ -103,7 +103,7 @@ jobs:
             --distpath "${{ github.workspace }}/build/macos/dist" \
             --workpath "${{ github.workspace }}/build/macos/work" \
             --specpath "${{ github.workspace }}/build/macos" \
-            --add-data "frames:frames" \
+            --add-data "${{ github.workspace }}/src/frames:frames" \
             --hidden-import customtkinter \
             --hidden-import pikepdf \
             --hidden-import tkinterdnd2 \
@@ -172,7 +172,7 @@ jobs:
             --distpath "${{ github.workspace }}/build/linux/dist" \
             --workpath "${{ github.workspace }}/build/linux/work" \
             --specpath "${{ github.workspace }}/build/linux" \
-            --add-data "frames:frames" \
+            --add-data "${{ github.workspace }}/src/frames:frames" \
             --hidden-import customtkinter \
             --hidden-import pikepdf \
             --hidden-import tkinterdnd2 \
