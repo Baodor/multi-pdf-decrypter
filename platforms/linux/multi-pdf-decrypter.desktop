@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Multi PDF Decrypter
+Comment=Entfernt Passwortschutz von PDF-Dateien
+Exec=/opt/multi-pdf-decrypter/multi-pdf-decrypter
+Icon=multi-pdf-decrypter
+Categories=Office;Utility;
+Terminal=false
+StartupNotify=true
+MimeType=application/pdf;

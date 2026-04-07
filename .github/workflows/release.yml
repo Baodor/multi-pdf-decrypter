@@ -1,0 +1,271 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  # ------------------------------------------------------------------ #
+  # Build jobs (one per platform)
+  # ------------------------------------------------------------------ #
+
+  build-windows:
+    name: Build (Windows)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: src/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r src/requirements.txt
+          pip install pyinstaller
+
+      - name: Build with PyInstaller
+        working-directory: src
+        run: |
+          pyinstaller `
+            --name "Multi PDF Decrypter" `
+            --windowed `
+            --onedir `
+            --distpath "${{ github.workspace }}/build/windows/dist" `
+            --workpath "${{ github.workspace }}/build/windows/work" `
+            --specpath "${{ github.workspace }}/build/windows" `
+            --add-data "frames;frames" `
+            --hidden-import customtkinter `
+            --hidden-import pikepdf `
+            --hidden-import tkinterdnd2 `
+            --hidden-import PIL `
+            --collect-all customtkinter `
+            --collect-all tkinterdnd2 `
+            main.py
+        shell: pwsh
+
+      - name: Create ZIP archive
+        working-directory: ${{ github.workspace }}/build/windows/dist
+        run: |
+          Compress-Archive `
+            -Path "Multi PDF Decrypter" `
+            -DestinationPath "Multi.PDF.Decrypter-Windows-${{ github.ref_name }}.zip" `
+            -Force
+        shell: pwsh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: build/windows/dist/Multi.PDF.Decrypter-Windows-${{ github.ref_name }}.zip
+          retention-days: 1
+
+  # ------------------------------------------------------------------ #
+
+  build-macos:
+    name: Build (macOS)
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: src/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r src/requirements.txt
+          pip install pyinstaller
+
+      - name: Build with PyInstaller
+        working-directory: src
+        run: |
+          pyinstaller \
+            --name "Multi PDF Decrypter" \
+            --windowed \
+            --onedir \
+            --distpath "${{ github.workspace }}/build/macos/dist" \
+            --workpath "${{ github.workspace }}/build/macos/work" \
+            --specpath "${{ github.workspace }}/build/macos" \
+            --add-data "frames:frames" \
+            --hidden-import customtkinter \
+            --hidden-import pikepdf \
+            --hidden-import tkinterdnd2 \
+            --hidden-import PIL \
+            --collect-all customtkinter \
+            --collect-all tkinterdnd2 \
+            --osx-bundle-identifier "com.baodor.multi-pdf-decrypter" \
+            main.py
+
+      - name: Set executable permissions
+        run: |
+          chmod +x \
+            "${{ github.workspace }}/build/macos/dist/Multi PDF Decrypter.app/Contents/MacOS/Multi PDF Decrypter"
+
+      - name: Create DMG
+        run: |
+          hdiutil create \
+            -volname "Multi PDF Decrypter" \
+            -srcfolder "${{ github.workspace }}/build/macos/dist/Multi PDF Decrypter.app" \
+            -ov \
+            -format UDZO \
+            "${{ github.workspace }}/build/macos/dist/Multi.PDF.Decrypter-macOS-${{ github.ref_name }}.dmg"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-build
+          path: build/macos/dist/Multi.PDF.Decrypter-macOS-${{ github.ref_name }}.dmg
+          retention-days: 1
+
+  # ------------------------------------------------------------------ #
+
+  build-linux:
+    name: Build (Linux / Ubuntu)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y python3-tk
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: src/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r src/requirements.txt
+          pip install pyinstaller
+
+      - name: Build with PyInstaller
+        working-directory: src
+        run: |
+          pyinstaller \
+            --name "multi-pdf-decrypter" \
+            --windowed \
+            --onedir \
+            --distpath "${{ github.workspace }}/build/linux/dist" \
+            --workpath "${{ github.workspace }}/build/linux/work" \
+            --specpath "${{ github.workspace }}/build/linux" \
+            --add-data "frames:frames" \
+            --hidden-import customtkinter \
+            --hidden-import pikepdf \
+            --hidden-import tkinterdnd2 \
+            --hidden-import PIL \
+            --collect-all customtkinter \
+            --collect-all tkinterdnd2 \
+            main.py
+
+      - name: Copy desktop integration file
+        run: |
+          cp platforms/linux/multi-pdf-decrypter.desktop \
+             "${{ github.workspace }}/build/linux/dist/multi-pdf-decrypter/"
+
+      - name: Create tar.gz archive
+        working-directory: ${{ github.workspace }}/build/linux/dist
+        run: |
+          tar -czf \
+            "Multi.PDF.Decrypter-Linux-${{ github.ref_name }}.tar.gz" \
+            multi-pdf-decrypter
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: build/linux/dist/Multi.PDF.Decrypter-Linux-${{ github.ref_name }}.tar.gz
+          retention-days: 1
+
+  # ------------------------------------------------------------------ #
+  # Release job: gathers all artifacts and publishes the GitHub Release
+  # ------------------------------------------------------------------ #
+
+  release:
+    name: Publish GitHub Release
+    needs: [build-windows, build-macos, build-linux]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout (for release notes)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download Windows build
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-build
+          path: release-assets
+
+      - name: Download macOS build
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-build
+          path: release-assets
+
+      - name: Download Linux build
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-build
+          path: release-assets
+
+      - name: List release assets
+        run: ls -lh release-assets/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Multi PDF Decrypter ${{ github.ref_name }}"
+          body: |
+            ## Multi PDF Decrypter ${{ github.ref_name }}
+
+            ### Downloads
+
+            | Plattform | Datei |
+            |-----------|-------|
+            | Windows 10/11 (64-Bit) | `Multi.PDF.Decrypter-Windows-${{ github.ref_name }}.zip` |
+            | macOS 11+ (Intel + Apple Silicon) | `Multi.PDF.Decrypter-macOS-${{ github.ref_name }}.dmg` |
+            | Linux / Ubuntu 22.04+ | `Multi.PDF.Decrypter-Linux-${{ github.ref_name }}.tar.gz` |
+
+            ### Installation
+
+            **Windows:** ZIP entpacken, `Multi PDF Decrypter.exe` starten. Keine Installation nötig.
+
+            **macOS:** DMG öffnen, App in den Programme-Ordner ziehen.
+            Beim ersten Start ggf. in Systemeinstellungen > Datenschutz & Sicherheit freigeben.
+
+            **Linux:** `tar -xzf Multi.PDF.Decrypter-Linux-${{ github.ref_name }}.tar.gz` und
+            `./multi-pdf-decrypter/multi-pdf-decrypter` ausführen.
+
+            ### Hinweise
+
+            Eine Python-Installation ist nicht erforderlich. Alle Abhängigkeiten sind im Build enthalten.
+
+          files: release-assets/*
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          generate_release_notes: true
