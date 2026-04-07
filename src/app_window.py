@@ -189,19 +189,30 @@ class AppState:
 
 
 def _make_app_class():
-    """Return an App class that inherits from TkinterDnD.DnDWrapper if available."""
+    """Return an App class that inherits from TkinterDnD.DnDWrapper if available.
+
+    Even when the Python package is present the underlying native tkdnd library
+    may fail to load (common on macOS with Python 3.12+ or mismatched Tcl/Tk
+    versions).  We catch that RuntimeError here and silently fall back to a
+    plain CTk window so the rest of the app still works.
+    """
     if DND_AVAILABLE:
 
         class App(ctk.CTk, TkinterDnD.DnDWrapper):
             def __init__(self):
                 super().__init__()
-                self.TkdndVersion = TkinterDnD._require(self)
+                try:
+                    self.TkdndVersion = TkinterDnD._require(self)
+                    self._dnd_ready = True
+                except (RuntimeError, Exception):
+                    self._dnd_ready = False
 
     else:
 
         class App(ctk.CTk):
             def __init__(self):
                 super().__init__()
+                self._dnd_ready = False
 
     return App
 
@@ -399,7 +410,7 @@ class MultiPDFDecrypterWindow:
     # ------------------------------------------------------------------
 
     def _register_dnd(self):
-        if not DND_AVAILABLE:
+        if not getattr(self._root, "_dnd_ready", False):
             return
         try:
             self._root.drop_target_register(DND_FILES)
